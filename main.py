@@ -1,19 +1,16 @@
 import jieba
-
 import re
 import numpy as np
 from collections import defaultdict, OrderedDict
 
 
 def get_file_contents(path):
-    string = ''
-    f = open(path, 'r', encoding='UTF-8')
-    line = f.readline()
-    while line:
-        string = string + line
-        line = f.readline()
-    f.close()
-    return string
+    try:
+        with open(path, 'r', encoding='UTF-8') as f:
+            return f.read()
+    except IOError:
+        print(f"Error: Failed to read file at {path}")
+        return ""
 
 
 def build_frequency_dict(tokens):
@@ -35,55 +32,60 @@ def align_dictionaries(dict1, dict2):
     return aligned_dict1, aligned_dict2
 
 
-def filter(string):
+def filter_text(string):
     pattern = re.compile(u"[^a-zA-Z0-9\u4e00-\u9fa5]")
     string = pattern.sub("", string)
     result = jieba.lcut(string)
     return result
 
 
-def calculate_simularity(text1, text2):
+def calculate_similarity(text1, text2):
     dict1 = build_frequency_dict(text1)
     dict2 = build_frequency_dict(text2)
 
-    # 对齐字典并按键排序
+    # Align dictionaries and sort by keys
     aligned_dict1, aligned_dict2 = align_dictionaries(dict1, dict2)
 
-
-    # 将字典的值转换为 NumPy 向量
+    # Convert dictionary values to NumPy arrays
     vector1 = np.array(list(aligned_dict1.values()))
     vector2 = np.array(list(aligned_dict2.values()))
 
-
     dot_product = np.dot(vector1, vector2)
-    # 计算向量范数
     norm1 = np.linalg.norm(vector1)
     norm2 = np.linalg.norm(vector2)
-    # 计算余弦相似度
     cosine_similarity = dot_product / (norm1 * norm2)
-
-    # 输出结果
 
     return cosine_similarity
 
+
 def save_float_to_file(float_number, file_path):
-    string = str(float_number)  # 将浮点数转换为字符串
-    with open(file_path, 'w') as file:
-        file.write(string)
+    try:
+        with open(file_path, 'w') as file:
+            file.write(str(float_number))
+    except IOError:
+        print(f"Error: Failed to write to file at {file_path}")
+
 
 def main():
+    path1 = input("Enter the absolute path of the original text file: ")
+    path2 = input("Enter the absolute path of the plagiarized text file: ")
+    file_path = input("Enter the absolute path to save the result file: ")
 
-    path1 = input("原文文件的绝对路径：")
-    path2 = input("抄袭文件的绝对路径：")
-    file_path = input("答案文件保存的绝对路径")
     str1 = get_file_contents(path1)
     str2 = get_file_contents(path2)
-    text1 = filter(str1)
-    text2 = filter(str2)
-    similarity = calculate_simularity(text1, text2)
-    print(similarity)
+
+    if not str1 or not str2:
+        print("Error: Empty input file(s). Aborting.")
+        return
+
+    text1 = filter_text(str1)
+    text2 = filter_text(str2)
+
+    similarity = calculate_similarity(text1, text2)
+    print("Similarity:", similarity)
+
     save_float_to_file(similarity, file_path)
-    return similarity
+    print("Result saved to:", file_path)
 
 
 if __name__ == '__main__':
