@@ -1,6 +1,7 @@
 import jieba
 import re
 import numpy as np
+import sys
 from collections import defaultdict, OrderedDict
 
 
@@ -61,9 +62,9 @@ def save_float_to_file(float_number, file_path):
 
 
 def main():
-    path1 = input("输入一个文件的绝对路径: ")
-    path2 = input("输入另一个文件的绝对路径: ")
-    file_path = input("输入答案文件的绝对路径: ")
+    path1 = sys.argv[1]  # 原文文件路径
+    path2 = sys.argv[2]  # 抄袭版论文文件路径
+    file_path = sys.argv[3]  # 答案文件路径
 
     str1 = get_file_contents(path1)
     str2 = get_file_contents(path2)
@@ -76,10 +77,8 @@ def main():
     text2 = filter_text(str2)
 
     similarity = calculate_similarity(text1, text2)
-    print("Similarity:", similarity)
-
+    print("相似度:", similarity)
     save_float_to_file(similarity, file_path)
-    print("Result saved to:", file_path)
 
 
 if __name__ == '__main__':
