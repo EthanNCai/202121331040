@@ -9,7 +9,7 @@ def get_file_contents(path):
         with open(path, 'r', encoding='UTF-8') as f:
             return f.read()
     except IOError:
-        print(f"Error: Failed to read file at {path}")
+        print(f"Error:文件读取失败，位置： {path}")
         return ""
 
 
@@ -42,19 +42,13 @@ def filter_text(string):
 def calculate_similarity(text1, text2):
     dict1 = build_frequency_dict(text1)
     dict2 = build_frequency_dict(text2)
-
-    # Align dictionaries and sort by keys
     aligned_dict1, aligned_dict2 = align_dictionaries(dict1, dict2)
-
-    # Convert dictionary values to NumPy arrays
     vector1 = np.array(list(aligned_dict1.values()))
     vector2 = np.array(list(aligned_dict2.values()))
-
     dot_product = np.dot(vector1, vector2)
     norm1 = np.linalg.norm(vector1)
     norm2 = np.linalg.norm(vector2)
     cosine_similarity = dot_product / (norm1 * norm2)
-
     return cosine_similarity
 
 
@@ -63,19 +57,19 @@ def save_float_to_file(float_number, file_path):
         with open(file_path, 'w') as file:
             file.write(str(float_number))
     except IOError:
-        print(f"Error: Failed to write to file at {file_path}")
+        print(f"Error: 文件写入失败，位置： {file_path}")
 
 
 def main():
-    path1 = input("Enter the absolute path of the original text file: ")
-    path2 = input("Enter the absolute path of the plagiarized text file: ")
-    file_path = input("Enter the absolute path to save the result file: ")
+    path1 = input("输入一个文件的绝对路径: ")
+    path2 = input("输入另一个文件的绝对路径: ")
+    file_path = input("输入答案文件的绝对路径: ")
 
     str1 = get_file_contents(path1)
     str2 = get_file_contents(path2)
 
     if not str1 or not str2:
-        print("Error: Empty input file(s). Aborting.")
+        print("Error: 空文件，程序即将终止")
         return
 
     text1 = filter_text(str1)
